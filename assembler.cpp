@@ -367,7 +367,7 @@ void firstPass(char *filename)
         }
     }
     cout << "End Not Specified" << endl;
-    exit(1); 
+    exit(1);
 }
 
 void SecondPass()
@@ -481,7 +481,7 @@ void SecondPass()
             }
             else
             {
-                cout <<  "Error Address out of bond" << endl;
+                cout << "Error Address out of bond" << endl;
                 exit(1);
             }
 
