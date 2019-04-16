@@ -654,7 +654,7 @@ void Print()
                 count+= Program[last].f;
                 last++;
             }
-            op << "T^" << hex_2(count) ;
+            op << "T^" << intToString(Program[i].address) << "^" << hex_2(count)  ;
             while(i!=last)
             {
                 if(Program[i].instruction=="RESW" || Program[i].instruction == "RESB" || Program[i].instruction == "EQU" )
@@ -678,6 +678,7 @@ void Print()
     for (int i = 0; i < Program.size(); i++)
     {
         // cout << "HAHAHA";
+
         if (Program[i].e == 1 || Program[i].f == 4)
         {
             op << "M^" << intToString(Program[i].address + 1) << "^05" << endl;
