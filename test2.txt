@@ -7,10 +7,9 @@
 .
 .
 COPY	START	0
-        +RD	    INPUT
-RLOOP	+TD	    INPUT
+        RD	INPUT
+RLOOP	TD	INPUT
         LDA     =C'EOF'
         LTORG
         JSUB 
-        
 END
