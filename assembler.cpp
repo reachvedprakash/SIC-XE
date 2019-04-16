@@ -53,85 +53,17 @@ string intToString(int n, int x = 6){										//function to convert int to stri
     return result;
 }
 
-string intToString2(long n, int x = 8){										//function to convert int to string of default lenght 6
-    stringstream stream;
-    stream<<hex<<n;
-    string result( stream.str() );
-    for(int y=0;y<result.length();y++)	result[y] = toupper(result[y]);
-    while(result.length()<x)	result = "0" + result;
-    return result;
-}
-
-
-string hex_2(int count)
-{
-    string str;
-    if(count< 16)
-    {
-        str+='0';
-        str+=hexlist[count];
-    }
-    else
-    {
-        str+=hexlist[count/16];
-        str+=hexlist[count%16];
-    }
-    
-    return str;
-}
-
-
 int strhextoint(string s)
 {
-    int sum = 0;
-    int l = s.length();
-    int i = 1;
-
-    for (auto x : s)
-    {
-        // cout << sum << " " << l-i << endl;
-        if (x == 'A')
-        {
-            sum += 10 * pow(16, l - i);
-        }
-        else if (x == 'B')
-        {
-            sum += 11 * pow(16, l - i);
-        }
-        else if (x == 'C')
-        {
-            sum += 12 * pow(16, l - i);
-        }
-        else if (x == 'D')
-        {
-            sum += 13 * pow(16, l - i);
-        }
-        else if (x == 'E')
-        {
-            sum += 14 * pow(16, l - i);
-        }
-        else if (x == 'F')
-        {
-            sum += 15 * pow(16, l - i);
-        }
-        else if (x <= 57 && x >= 48)
-        {
-            int i = (int)x;
-            sum = i * pow(16, l - i);
-        }
-        else
-        {
-            cout << "Invalid hex" << endl;
-            exit(1);
-        }
-        i++;
-    }
-    return sum;
+    int x;   
+    stringstream ss;
+    ss << hex << s;
+    ss >> x;
+    return x;
 }
 
 void optab()
 {
-    // cout << "OPTAB Creation" << endl;
     string ins;
     int oc, frm;
     string str;
@@ -143,7 +75,6 @@ void optab()
         iss >> ins;
         iss >> frm;
         iss >> hex >> oc;
-        // cout << ins << " " << frm << " " << hex << oc << endl;
         format[ins] = frm;
         opcode[ins] = oc;
     }
@@ -166,7 +97,6 @@ void firstPass(char *filename)
             iss >> sub;
             list.push_back(sub);
             count++;
-            // cout << sub <<  "\t" << count << endl;
         }
         if (list[0][0] == '.')
         {
@@ -187,12 +117,13 @@ void firstPass(char *filename)
                 address += literaltable[x].first;
                 Program[i].f=literaltable[x].first;
                 Program[i].opcode = literaltable[x].second;
-                // cout << Program[i].address << " " << Program[i].label << " " << Program[i].instruction << " " << Program[i].parameter << " " << Program[i].objectCode << endl;
                 i++;
                 }
                 littab.clear();
 
             }
+            lastaddr = address ;
+            
             return;
         }
         else if (list[0] == "BASE")
@@ -204,15 +135,15 @@ void firstPass(char *filename)
         else if (i == -1 && list[1] == "START")
         {
             Prgname = list[0];
-            // cout << Prgname << endl ;
+           
             straddr = strhextoint(list[2]);
-            // cout << straddr << endl;
+           
             address = straddr;
             i++;
         }
         else if (list[0] == "LTORG")
         {
-            // cout << "\tLTORG" << endl;
+            
             for (auto x : littab)
             {
                 symtab[x] = address;
@@ -224,9 +155,7 @@ void firstPass(char *filename)
                 address += literaltable[x].first;
                 Program[i].f=literaltable[x].first;
                 Program[i].opcode = literaltable[x].second;
-                // cout << literaltable[x].second << endl << endl << endl ;
-                // cout << Program[i].address << " " << Program[i].label << " " << Program[i].instruction << " " << Program[i].parameter << " " << Program[i].objectCode << endl;
-                i++;
+                 i++;
             }
             littab.clear();
         }
@@ -239,7 +168,6 @@ void firstPass(char *filename)
             Program[i].parameter = list[2];
             address += stoi(list[2]) * 3;
             Program[i].f=0;
-            // cout << Program[i].address << " " << Program[i].label << " " << Program[i].instruction << " " << Program[i].parameter << " " << Program[i].objectCode << endl;
             i++;
         }
         else if (list[1] == "RESB")
@@ -251,8 +179,7 @@ void firstPass(char *filename)
             Program[i].parameter = list[2];
             address += stoi(list[2]);
             Program[i].f=0;
-            // cout << Program[i].address << " " << Program[i].label << " " << Program[i].instruction << " " << Program[i].parameter << " " << Program[i].objectCode << endl;
-            i++;
+             i++;
         }
         else if (list[1] == "WORD")
         {
@@ -262,10 +189,9 @@ void firstPass(char *filename)
             Program[i].instruction = "WORD";
             Program[i].parameter = '\0';
             Program[i].objectCode = stoi(list[2]);
-            Program[i].opcode = hex_2(stoi(list[2]));
+            Program[i].opcode = intToString(stoi(list[2]),2);
             address += 3;
             Program[i].f=3;
-            // cout << Program[i].address << " " << Program[i].label << " " << Program[i].instruction << " " << Program[i].parameter << " " << Program[i].objectCode << endl;
             i++;
         }
         else if (list[1] == "BYTE")
@@ -279,8 +205,7 @@ void firstPass(char *filename)
             Program[i].opcode = list[3];
             address += 1;
             Program[i].f=1;
-            // cout << Program[i].address << " " << Program[i].label << " " << Program[i].instruction << " " << Program[i].parameter << " " << Program[i].objectCode << endl;
-            i++;
+           i++;
         }
         else if (list[1] == "EQU")
         {
@@ -301,7 +226,6 @@ void firstPass(char *filename)
                 Program[i].address = stoi(list[2]);
                 symtab[list[0]] = stoi(list[2]);
             }
-            // cout << Program[i].address << " " << Program[i].label << " " << Program[i].instruction << " " << Program[i].parameter << " " << Program[i].objectCode << endl;
             i++;
         }
 
@@ -347,7 +271,6 @@ void firstPass(char *filename)
                 {
                     littab.insert(Program[i].parameter);
                 }
-                // cout << Program[i].address << "  " << Program[i].instruction << " " << Program[i].parameter << " " << Program[i].e << endl;
                 i++;
             }
             else if (i != -1 && count == 4)
@@ -398,7 +321,6 @@ void firstPass(char *filename)
                 {
                     littab.insert(Program[i].parameter);
                 }
-                // cout << Program[i].address << "  " << Program[i].label << " " << Program[i].instruction << " " << Program[i].parameter << " " << Program[i].e << endl;
                 i++;
             }
             else if (i != -1 && count == 2)
@@ -437,11 +359,10 @@ void firstPass(char *filename)
                 }
 
                 Program[i].parameter = "\0";
-                // cout << Program[i].address << "  " << Program[i].instruction << " " << Program[i].parameter << " " << Program[i].e << endl;
                 i++;
             }
         }
-        lastaddr = address ; 
+         
     }
     return;
 }
@@ -457,13 +378,11 @@ void SecondPass()
         }
         if(Program[i].instruction == "LLLL")
         {
-            //  cout << Program[i].instruction << " " <<  Program[i].opcode << endl;
              continue;
         }
         if(Program[i].instruction == "RSUB")
         {
             Program[i].opcode = "4F0000";
-            // cout << Program[i].instruction << " " <<  Program[i].opcode << endl;
             continue;
         }
         if (Program[i].parameter[0]== '@')
@@ -487,9 +406,9 @@ void SecondPass()
                         sum = (Program[i].objectCode/16)*pow(16,5);
                         sum+= (Program[i].objectCode%16+Program[i].n*2 + Program[i].i)*pow(16,4);
                         sum+= stoi(Program[i].parameter);
-                        // cout << Program[i].parameter << endl << endl << endl ; 
+    
                         Program[i].opcode = intToString(sum);
-                        // cout << Program[i].instruction << " " <<  Program[i].opcode << endl;
+                        
                         continue;
                     }
                 }
@@ -518,26 +437,25 @@ void SecondPass()
         if(Program[i].f==2)
         {
             Program[i].objectCode = opcode[Program[i].instruction];
-                Program[i].opcode+=hex_2(Program[i].objectCode);
-                // cout << Program[i].opcode << endl;
+                Program[i].opcode+=intToString(Program[i].objectCode,2);
                 Program[i].opcode+=regcode  [Program[i].parameter[0]];
-                // cout << Program[i].parameter << endl;
-                // cout << Program[i].opcode << endl;
+                
+                
                 if(Program[i].parameter[2])
                 {
-                    // cout << Program[i].parameter[2] << endl;
+                
                     Program[i].opcode+=regcode[Program[i].parameter[2]];
-                    // cout << Program[i].opcode << endl;
+                
                 }
                 else
                 {
                     Program[i].opcode+='0';
-                    // cout << Program[i].opcode << endl;
+                
                 }
                 
                     
                 
-                // cout << Program[i].instruction << " " <<  Program[i].opcode << endl;
+                
         }
         if(Program[i].f==3)
         {
@@ -545,55 +463,44 @@ void SecondPass()
             Program[i].objectCode = opcode[Program[i].instruction];
             sum = (Program[i].objectCode/16)*pow(16,5);
             sum+= (Program[i].objectCode%16+Program[i].n*2 + Program[i].i)*pow(16,4);
-            // cout << sum << endl;
-            // sum+= (Program[i].x*8+Program[i].b*4 + Program[i].p*2 + Program[i].e)*pow(16,3);
+            
+            
             if(abs(Program[i+1].address - symtab[Program[i].parameter]) <= 4095 )
             {
                 Program[i].p=1;
                 Program[i].b=0;
                 sum+= (Program[i].x*8+Program[i].b*4 + Program[i].p*2 + Program[i].e)*pow(16,3);
-                // cout << sum << endl;
-                // cout <<  endl << endl << endl;
-                // cout << Program[i].x*8+Program[i].b*4 + Program[i].p*2 + Program[i].e << endl;
+            
+            
+            
                 sum+= (symtab[Program[i].parameter]-Program[i+1].address);
                 if(symtab[Program[i].parameter]-Program[i+1].address< 0)
                 {
                     sum+=pow(16,3);
                 }
-                // cout << symtab[Program[i].instruction]-Program[i+1].address << endl;
-                // cout << sum << endl;
+             
+             
 
-                // cout << Program[i+1].address  << endl;
-                // cout <<  symtab[Program[i].parameter] << endl;
+             
             }
             else if (base &&  (abs(symtab[Basearg] - symtab[Program[i].parameter] ) <= 4095))
             {
                 Program[i].p=0;
                 Program[i].b=1;
                 sum+= (Program[i].x*8+Program[i].b*4 + Program[i].p*2 + Program[i].e)*pow(16,3);
-                // cout << sum << endl;
-                // cout << endl << endl;
-                // cout << Program[i].x*8+Program[i].b*4 + Program[i].p*2 + Program[i].e << endl;
                 sum+= (symtab[Program[i].parameter] - symtab[Basearg] );
                 if(symtab[Program[i].parameter] - symtab[Basearg] < 0)
                 {
                     sum+=pow(16,3);
                 }
-                // cout << Program[i].parameter << endl;
-                // cout << symtab[Basearg]  << endl;
-                // cout <<  symtab[Program[i].parameter] << endl;
-                // cout << sum << endl;
-            }
+              }
             else
             {
                 cout << "Error" <<  " " <<  abs(symtab[Program[i].parameter]-symtab[Basearg] ) <<endl;
             }
             
             Program[i].opcode = intToString(sum);
-            // cout << Program[i].instruction << " " <<  Program[i].opcode << endl;
-
-
-        }
+            }
         if(Program[i].f==4)
         {
             Program[i].p=0;
@@ -601,17 +508,11 @@ void SecondPass()
             long sum=0;
             Program[i].objectCode = opcode[Program[i].instruction];
             sum = (Program[i].objectCode/16)*pow(16,7);
-            // cout << sum << endl;
             sum+= (Program[i].objectCode%16+Program[i].n*2 + Program[i].i)*pow(16,6);
-            // cout << sum << endl;
             sum+= pow(16,5);
-            // cout << sum << endl;
             sum+= symtab[Program[i].parameter];
-            // cout << sum << endl;
-            Program[i].opcode = intToString2(sum);
-            // cout <<  Program[i].instruction << " " << Program[i].opcode << endl;
-
-
+            Program[i].opcode = intToString(sum,8);
+        
         }
 
         
@@ -654,7 +555,7 @@ void Print()
                 count+= Program[last].f;
                 last++;
             }
-            op << "T^" << intToString(Program[i].address) << "^" << hex_2(count)  ;
+            op << "T^" << intToString(Program[i].address) << "^" << intToString(count,2)  ;
             while(i!=last)
             {
                 if(Program[i].instruction=="RESW" || Program[i].instruction == "RESB" || Program[i].instruction == "EQU" )
@@ -677,8 +578,6 @@ void Print()
     }
     for (int i = 0; i < Program.size(); i++)
     {
-        // cout << "HAHAHA";
-
         if (Program[i].e == 1 || Program[i].f == 4)
         {
             op << "M^" << intToString(Program[i].address + 1) << "^05" << endl;
@@ -702,18 +601,9 @@ int main(int argc, char *argv[])
     literaltable["=X\'05\'"].first = 1;
     literaltable["=X\'05\'"].second = "05";
 
-    // for (auto x : literaltable)
-    // {
-    //     cout << x.first << " " << x.second.first << " " << x.second.second << endl;
-    // }
     
-    // cout << "Hello World" << endl;
     optab();
     firstPass(argv[1]);
     SecondPass();
     Print();
-    // for(auto x : symtab)
-    // {
-    //     cout << x.first << "\t" << x.second << endl;
-    // }
 }
