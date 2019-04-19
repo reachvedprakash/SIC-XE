@@ -5,7 +5,7 @@
 0006  CLOOP     +JSUB     RDREC     4B101036  
 000A            LDA       LENGTH    032026    
 000D            COMP      #0        290000    
-0010            JEQ       ENDFILL   332FED    
+0010            JEQ       ENDFIL    332007    
 0013            +JSUB     WRREC     4B10105D  
 0017            J         CLOOP     3F2FEC    
 001A  ENDFIL    LDA       =C'EOF'   032010    
