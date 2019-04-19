@@ -39,8 +39,19 @@ public:
     int x;
     int b;
     int p;
+    string comment ;
 };
 vector<Ins> Program(100);
+
+
+string str(string x , int n)
+{
+    string str = x;
+    for(int i=x.length(); i< n ; i++)
+    str+=" ";
+    return str;
+}
+
 
 string intToString(int n, int x = 6)
 { //function to convert int to string of default lenght 6
@@ -81,6 +92,130 @@ void optab()
     }
 }
 
+
+void Inter()
+{
+    ofstream fp("Intermediate.txt");
+    fp << str(intToString( straddr,4),10) << str(Prgname , 10) << str("START",10) <<straddr << endl;
+    for(int i=0;i<Program.size() ; i++)
+    {
+
+        if(Program[i].comment!="\0")
+        {
+            fp << "          "+Program[i].comment << endl;
+            continue;
+        }
+        if(Program[i].instruction != "\0")
+        {
+            if(Program[i].label!="\0")
+            {
+                            fp << str(intToString( Program[i].address,4),10) << str(Program[i].label,10) ;
+                            if(Program[i].e)
+                            {
+                                fp << str("+"+Program[i].instruction,10) ;
+                            }
+                            else
+                            {
+                                fp << str(Program[i].instruction,10);
+                            }
+                            fp << str(Program[i].parameter,10) << endl;
+            }
+            else
+            {
+               fp << str(intToString( Program[i].address,4),10) << str("",10) ;
+                            if(Program[i].e)
+                            {
+                                fp << str("+"+Program[i].instruction,10) ;
+                            }
+                            else
+                            {
+                                fp << str(Program[i].instruction,10);
+                            }
+                            fp << str(Program[i].parameter,10) << endl;
+            }
+            
+            // cout  << intToString( Program[i].address,4) << "\t" << Program[i].label << "\t\t" << Program[i].instruction  << "\t\t" << Program[i].parameter << endl; 
+        }
+    }
+}
+
+
+
+void Final()
+{
+    ofstream fp("Final.txt");
+    fp << str(intToString( straddr,4),6) << str(Prgname , 10) << str("START",10) <<straddr << endl;
+    for(int i=0;i<Program.size() ; i++)
+    {
+         if(Program[i].comment!="\0")
+        {
+            fp << "        "+Program[i].comment << endl;
+            continue;
+        }
+        int n =10;
+        if(Program[i].instruction != "\0")
+        {
+            if(Program[i].label!="\0")
+            {
+                        fp << str(intToString( Program[i].address,4),6) << str(Program[i].label,10);
+                        if(Program[i].e)
+                        {
+                            fp << "+" ;
+                            fp << str(Program[i].instruction,9);
+                        }
+                        else
+                        {
+                            fp << str(Program[i].instruction,10);
+                        }
+                        
+                        
+                        if(Program[i].i==0) {fp << "@";n--; }
+                        if(Program[i].n==0) {fp << "#";n--; }
+                        if(Program[i].x) 
+                        {   
+                            fp << str(Program[i].parameter+",X",n);
+                        }
+                        else
+                        {
+                            fp << str(Program[i].parameter,n);
+                        }
+                        
+                        fp << str(Program[i].opcode,10) << endl;
+            }
+            else
+            {
+                fp << str(intToString( Program[i].address,4),6) << str("",10);
+                        if(Program[i].e)
+                        {
+                            fp << "+" ;
+                            fp << str(Program[i].instruction,9);
+                        }
+                        else
+                        {
+                            fp << str(Program[i].instruction,10);
+                        }
+                        
+                        
+                        if(Program[i].i==0) {fp << "@";n--; }
+                        if(Program[i].n==0) {fp << "#";n--; }
+                        if(Program[i].x) 
+                        {   
+                            fp << str(Program[i].parameter+",X",n);
+                        }
+                        else
+                        {
+                            fp << str(Program[i].parameter,n);
+                        }
+                        
+                        fp << str(Program[i].opcode,10) << endl;
+            }
+            
+        }
+    }
+}
+
+
+
 void firstPass(char *filename)
 {
     string str;
@@ -101,6 +236,9 @@ void firstPass(char *filename)
         }
         if (list[0][0] == '.')
         {
+            Program[i].address=address;
+             Program[i].comment = str;
+            i++;
             continue;
         }
         else if (list[0] == "END")
@@ -111,8 +249,8 @@ void firstPass(char *filename)
                 {
                     symtab[x] = address;
                     Program[i].address = address;
-                    Program[i].label = x;
-                    Program[i].instruction = "LLLL";
+                    Program[i].label = "\0";
+                    Program[i].instruction = "*";
                     Program[i].parameter = x;
                     Program[i].objectCode = strhextoint(literaltable[x].second);
                     address += literaltable[x].first;
@@ -122,11 +260,15 @@ void firstPass(char *filename)
                 }
                 littab.clear();
             }
+            Inter();
             lastaddr = address;
             return;
         }
         else if (list[0] == "BASE")
         {
+            Program[i].address=address;
+             Program[i].comment = str;
+            i++;
             Basearg = list[1];
             base = true;
             continue;
@@ -142,13 +284,16 @@ void firstPass(char *filename)
         }
         else if (list[0] == "LTORG")
         {
+            Program[i].address=address;
+            Program[i].comment = str;
+            i++;
 
             for (auto x : littab)
             {
                 symtab[x] = address;
                 Program[i].address = address;
-                Program[i].label = x;
-                Program[i].instruction = "LLLL";
+                Program[i].label = "\0";
+                Program[i].instruction = "*";
                 Program[i].parameter = x;
                 Program[i].objectCode = strhextoint(literaltable[x].second);
                 address += literaltable[x].first;
@@ -186,7 +331,7 @@ void firstPass(char *filename)
             Program[i].label = list[0];
             symtab[list[0]] = address;
             Program[i].instruction = "WORD";
-            Program[i].parameter = '\0';
+            Program[i].parameter = list[2];
             Program[i].objectCode = stoi(list[2]);
             Program[i].opcode = intToString(stoi(list[2]), 2);
             address += 3;
@@ -199,7 +344,7 @@ void firstPass(char *filename)
             Program[i].label = list[0];
             symtab[list[0]] = address;
             Program[i].instruction = "BYTE";
-            Program[i].parameter = '\0';
+            Program[i].parameter = list[2];
             Program[i].objectCode = strhextoint(list[3]);
             Program[i].opcode = list[3];
             address += 1;
@@ -211,7 +356,7 @@ void firstPass(char *filename)
             Program[i].label = list[0];
 
             Program[i].instruction = "EQU";
-            Program[i].parameter = '\0';
+            Program[i].parameter = list[2];
             Program[i].f = 3;
             if (list[2] == "*")
             {
@@ -375,16 +520,27 @@ void SecondPass()
 
     for (int i = 0; i < Program.size(); i++)
     {
-        if (Program[i].instruction == "RESW" || Program[i].instruction == "RESB" || Program[i].instruction == "\0" || Program[i].instruction == "BYTE" || Program[i].instruction == "WORD" || Program[i].instruction == "")
+         if(Program[i].comment!="\0")
         {
+            // cout << "          "+Program[i].comment << endl;
             continue;
         }
-        if (Program[i].instruction == "LLLL")
+        if (Program[i].instruction == "RESW" || Program[i].instruction == "RESB" || Program[i].instruction == "\0" || Program[i].instruction == "BYTE" || Program[i].instruction == "WORD" || Program[i].instruction == "" || Program[i].instruction == "EQU")
         {
+            Program[i].n=1;
+            Program[i].i=1;
+            continue;
+        }
+        if (Program[i].instruction == "*")
+        {
+            Program[i].n=1;
+            Program[i].i=1;
             continue;
         }
         if (Program[i].instruction == "RSUB")
         {
+             Program[i].n=1;
+            Program[i].i=1;
             Program[i].opcode = "4F0000";
             continue;
         }
@@ -413,6 +569,12 @@ void SecondPass()
 
                     continue;
                 }
+                else
+                {
+                    cout << "Address overflow or invalid Parameter" << endl;
+                    exit(1);
+                }
+                
             }
             else
             {
@@ -500,12 +662,13 @@ void SecondPass()
             Program[i].opcode = intToString(sum, 8);
         }
     }
+    Final();
 }
 
 void Print()
 {
-    system("rm output.txt");
-    ofstream op("output.txt");
+    system("rm Output.txt");
+    ofstream op("Output.txt");
     op << "H^";
     int l = Prgname.length();
     for (int i = 0; i <= 5; i++)
@@ -585,4 +748,9 @@ int main(int argc, char *argv[])
     firstPass(argv[1]);
     SecondPass();
     Print();
+
+    // for(auto x : symtab)
+    // {
+    //     cout << x.first << " \t" << x.second << endl;
+    // }
 }
